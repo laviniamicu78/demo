@@ -1,19 +1,46 @@
 # Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
 trigger:
-- main
+- master
+- develop
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'windows-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- script: npm install
+  displayName: 'Install Node.js dependencies'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- script: npm run lint
+  displayName: 'Run lint checks'
+
+  - script: npm run build
+  displayName: 'Build the project'
+
+- script: npm test
+  displayName: 'Run tests'
+
+  - task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'dist' # Replace 'dist' with your build output directory
+    ArtifactName: 'drop'
+  displayName: 'Publish build artifacts'
+
+  - task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'YourSonarQubeServiceConnection'
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: 'your-project-key'
+    cliProjectName: 'your-project-name'
+
+- task: SonarQubeAnalyze@5
+  displayName: 'Run SonarQube analysis'
+
+  - task: AzureRmWebAppDeployment@4
+  inputs:
+    azureSubscription: 'YourAzureSubscription'
+    appType: 'webApp'
+    WebAppName: 'YourWebAppName'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/drop/*.zip'
