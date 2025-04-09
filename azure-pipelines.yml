@@ -15,32 +15,34 @@ steps:
 - script: npm run lint
   displayName: 'Run lint checks'
 
-  - script: npm run build
+- script: npm run build
   displayName: 'Build the project'
 
 - script: npm test
   displayName: 'Run tests'
 
-  - task: PublishBuildArtifacts@1
+- task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: 'dist' # Replace 'dist' with your build output directory
     ArtifactName: 'drop'
   displayName: 'Publish build artifacts'
 
-  - task: SonarQubePrepare@5
+- task: SonarQubePrepare@5
   inputs:
-    SonarQube: 'YourSonarQubeServiceConnection'
+    SonarQube: 'YourSonarQubeServiceConnection' # Replace with your service connection
     scannerMode: 'CLI'
     configMode: 'manual'
-    cliProjectKey: 'your-project-key'
-    cliProjectName: 'your-project-name'
+    cliProjectKey: 'your-project-key' # Replace with your project key
+    cliProjectName: 'your-project-name' # Replace with your project name
+  displayName: 'Prepare SonarQube analysis'
 
 - task: SonarQubeAnalyze@5
   displayName: 'Run SonarQube analysis'
 
-  - task: AzureRmWebAppDeployment@4
+- task: AzureRmWebAppDeployment@4
   inputs:
-    azureSubscription: 'YourAzureSubscription'
+    azureSubscription: 'YourAzureSubscription' # Replace with your Azure subscription
     appType: 'webApp'
-    WebAppName: 'YourWebAppName'
+    WebAppName: 'YourWebAppName' # Replace with your Web App name
     packageForLinux: '$(System.DefaultWorkingDirectory)/drop/*.zip'
+  displayName: 'Deploy to Azure Web App'
